@@ -1,0 +1,55 @@
+---
+- name: Init linux setup
+  hosts: all:!localhost
+  become: yes
+  become_method: su
+  become_user: root
+
+  tasks:
+    - block: 
+        - name: Update repo Debian
+          apt: update_cache=yes
+
+        - name: Upgrade system Debian
+          apt: upgrade=yes
+
+        - name: Install some needed packages Debian
+          apt: name={{ item }} state=latest
+          with_items: 
+             - python
+             - git
+             - mc
+             - htop
+             - neofetch
+             - nano
+             - net-tools
+             - sudo
+
+      when: ansible_os_family == "Debian"
+    
+    - block: 
+
+        - name: Update repo RedHat 
+          yum: update_cache=yes
+
+        - name: Upgrade system RedHat
+          yum: upgrade=yes
+
+        - name: Install some needed packages RedHat
+          yum: name={{ item }} state=installed
+          with_items: 
+             - epel-release
+             - python
+             - git
+             - mc
+             - htop
+             - neofetch
+             - nano
+             - net-tools
+             - sudo
+
+      when: ansible_os_family == "RedHat" 
+    
+    - name: Add me to sudoers
+      ansible.builtin.shell:
+        cmd: /usr/sbin/usermod -a -G sudo nocrail
